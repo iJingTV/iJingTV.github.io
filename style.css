@@ -1,0 +1,143 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+img, h1, h2 {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 2em;
+    padding: 20px 0;
+}
+
+.waterfall {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 20px;
+    padding: 0 20px;
+}
+
+.waterfall-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+}
+
+.card {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-image {
+    width: 100%;
+    height: auto;
+}
+
+.card-content {
+    padding: 15px;
+    padding-top: 8px;
+}
+
+.card-title {
+    font-size: 1.1em;
+    color: #2c3e50;
+
+    &:hover {
+        text-decoration: underline;
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+
+        &::before {
+            content: '#';
+            display: inline-block;
+            width: 0em;
+            opacity: 0;
+            text-align: center;
+            transition: width ease-out 0.3s, opacity ease-in 0.3s;
+        }
+
+        &:hover::before {
+            width: 1em;
+            opacity: 1;
+        }
+    }
+}
+
+.card-text {
+    margin-top: 4px;
+    color: #7f8c8d;
+}
+
+.card-footer {
+    padding: 10px 15px;
+    border-top: 1px solid #eee;
+    color: #95a5a6;
+    font-size: 0.9em;
+}
+
+.highlight {
+    border-color: #ffc107 !important;
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.5) !important;
+    transform: scale(1.02);
+}
+
+.message-container {
+    padding: 8px 16px 18px;
+    background-color: #f2f2f2;
+}
+
+.message {
+    display: flex;
+    margin-top: 10px;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.message-name {
+    color: #9e9e9e;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.message-content {
+    margin-top: 4px;
+    background-color: white;
+    padding: 10px 15px;
+    border-radius: 10px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+}

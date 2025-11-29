@@ -3,181 +3,199 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>台州静哥哥圣经</title>
+        <title>静哥哥圣经</title>
         <script src="./waterfall.js"></script>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-
-            header {
-                text-align: center;
-                margin-bottom: 30px;
-                padding: 20px;
-            }
-
-            h1 {
-                text-align: center;
-                color: #2c3e50;
-                margin-bottom: 10px;
-                font-size: 2em;
-                padding: 20px 0;
-            }
-
-            .waterfall {
-                display: flex;
-                flex-direction: row;
-                justify-content: center;
-                gap: 20px;
-                padding: 0 20px;
-            }
-
-            .waterfall-column {
-                display: flex;
-                flex-direction: column;
-                gap: 20px;
-                flex: 1;
-            }
-
-            .card {
-                background: white;
-                border-radius: 10px;
-                overflow: hidden;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-            }
-
-            .card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            }
-
-            .card-img {
-                width: 100%;
-                height: auto;
-                display: block;
-                background-size: cover;
-                background-position: center;
-            }
-
-            .card-content {
-                padding: 15px;
-                padding-top: 12px;
-            }
-
-            .card-title {
-                font-size: 1.1em;
-                color: #2c3e50;
-
-                &:hover {
-                    text-decoration: underline;
-                }
-
-                a {
-                    color: inherit;
-                    text-decoration: none;
-
-                    &::before {
-                        content: '#';
-                        display: inline-block;
-                        width: 0em;
-                        opacity: 0;
-                        text-align: center;
-                        transition: width ease-out 0.3s, opacity ease-in 0.3s;
-                    }
-
-                    &:hover::before {
-                        width: 1em;
-                        opacity: 1;
-                    }
-                }
-            }
-
-            .card-text {
-                margin-top: 4px;
-                color: #7f8c8d;
-            }
-
-            .card-footer {
-                padding: 10px 15px;
-                border-top: 1px solid #eee;
-                color: #95a5a6;
-                font-size: 0.9em;
-            }
-
-            .highlight {
-                border-color: #ffc107 !important;
-                box-shadow: 0 0 20px rgba(255, 193, 7, 0.5) !important;
-                transform: scale(1.02);
-            }
-
-            footer {
-                text-align: center;
-                padding: 20px;
-            }
-        </style>
+        <link rel="stylesheet" href="./style.css">
     </head>
     <body>
-        <h1>台州静哥哥圣经</h1>
-
+        <h1>静哥哥圣经</h1>
         <div class="waterfall" id="waterfall"></div>
-        <script type="module">
-            const res = await fetch('./assets/quotations.json');
-            const items = await res.json();
-
-            const elements = items.map(({ width, height, title, format = 'png', messages }) => {
-                const element = document.createElement('div');
-                element.className = 'card';
-                element.id = title;
-                element.innerHTML = `
-                        <img class="card-img" alt="${title}" src="./assets/quotations/${title}.${format}" style="aspect-ratio: ${width} / ${height};">
-                        <div class="card-content">
-                            <h2 class="card-title"><a href="#${title}">${title}</a></h2>
-                            <div class="card-text">${messages.join('<br>')}</div>
-                        </div>
-                    `;
-                return element;
-            });
-
-            const waterfall = new Waterfall('waterfall', elements, 20);
-
-            function resizeWaterfall() {
-                if (window.innerWidth >= 1440) {
-                    waterfall.handleResize(4);
-                } else if (window.innerWidth >= 1024) {
-                    waterfall.handleResize(3);
-                } else if (window.innerWidth) {
-                    waterfall.handleResize(2);
-                }
-            }
-
-            window.addEventListener('resize', resizeWaterfall);
-            resizeWaterfall();
-
-            if (window.location.hash) {
-                scrollToSection(window.location.hash);
-            }
-
-            window.addEventListener('hashchange', function () {
-                scrollToSection(window.location.hash);
-            });
-
-            function scrollToSection(hash) {
-                hash = decodeURIComponent(hash.substring(1));
-                const element = document.getElementById(hash);
-                if (element) {
-                    element.classList.add('highlight');
-                    setTimeout(() => {
-                        element.classList.remove('highlight');
-                    }, 1000);
-                    element.scrollIntoView({ behavior: 'smooth' });
-                }
-            }
-        </script>
-        <br>
+        <template id="message-template">
+            <div class="message">
+                <img class="message-avatar" alt="avatar" src="./assets/jing-avatar.jpg">
+                <div class="message-body">
+                    <div class="message-name">静哥哥</div>
+                    <div class="message-content"></div>
+                </div>
+            </div>
+        </template>
         <footer>
+            <div class="actions">
+                <button id="showImage">显示图片</button>
+                <button id="showMessage">显示消息</button>
+                <button id="toggleDetail">显示详细信息</button>
+            </div>
+            <script type="module">
+                const currentState = {
+                    mode: 'image',
+                    showDetail: false
+                };
+
+                function parseUrlParams() {
+                    const urlParams = new URLSearchParams(window.location.search);
+
+                    if (urlParams.has('image')) {
+                        currentState.mode = 'image';
+                    } else if (urlParams.has('message')) {
+                        currentState.mode = 'message';
+                    }
+
+                    if (urlParams.has('detail')) {
+                        currentState.showDetail = true;
+                    }
+                }
+
+                window.addEventListener('popstate', () => {
+                    parseUrlParams();
+                    updateButtonStates();
+                    renderContent();
+                });
+
+                function updateButtonStates() {
+                    document.getElementById('showImage').classList.toggle('active', currentState.mode === 'image');
+                    document.getElementById('showMessage').classList.toggle('active', currentState.mode === 'message');
+                    document.getElementById('toggleDetail').textContent = currentState.showDetail ? '隐藏详细信息' : '显示详细信息';
+                }
+
+                function updateUrl() {
+                    updateButtonStates();
+                    const params = [];
+
+                    if (currentState.mode === 'image') {
+                        params.push('image');
+                    } else {
+                        params.push('message');
+                    }
+
+                    if (currentState.showDetail) {
+                        params.push('detail');
+                    }
+
+                    let newUrl = `${window.location.pathname}?${params.join('&')}`;
+                    window.history.pushState({}, '', newUrl + window.location.hash);
+                    renderContent();
+                    scrollToSection(window.location.hash);
+                }
+
+
+                parseUrlParams();
+                updateButtonStates();
+
+                document.getElementById('showImage').addEventListener('click', () => {
+                    currentState.mode = 'image';
+                    updateUrl();
+                });
+
+                document.getElementById('showMessage').addEventListener('click', () => {
+                    currentState.mode = 'message';
+                    updateUrl();
+                });
+
+                document.getElementById('toggleDetail').addEventListener('click', () => {
+                    currentState.showDetail = !currentState.showDetail;
+                    updateUrl();
+                });
+
+                const res = await fetch('./assets/quotations.json');
+                /** @type {{ width: number, height: number, title: string, format: string, messages: string[] }[]} */
+                const items = await res.json();
+
+                const params = new URLSearchParams(window.location.search);
+
+                /** @type {HTMLTemplateElement} */
+                const messageTemplate = document.getElementById('message-template');
+
+                function renderMessages(/** @type {string[]} */ messages) {
+                    const element = document.createElement('div');
+                    element.className = 'message-container';
+                    for (let message of messages) {
+                        const clone = messageTemplate.content.cloneNode(true);
+                        if (message.startsWith('@')) {
+                            clone.querySelector('.message-avatar').src = './assets/default-avatar.png';
+                            clone.querySelector('.message-name').innerText = '群友';
+                            message = message.substring(1);
+                        }
+                        clone.querySelector('.message-content').innerHTML = message;
+                        element.appendChild(clone);
+                    }
+                    return element;
+                }
+
+                function renderCard({ width, height, title, format = 'png', messages }, isMessage) {
+                    const element = document.createElement('div');
+                    element.className = 'card';
+                    element.dataset.title = title;
+                    if (isMessage) {
+                        element.appendChild(renderMessages(messages));
+                    } else {
+                        const img = document.createElement('img');
+                        img.className = 'card-image';
+                        img.alt = title;
+                        img.src = `./assets/quotations/${title}.${format}`;
+                        img.style.aspectRatio = `${width} / ${height}`;
+                        element.appendChild(img);
+                    }
+                    const content = document.createElement('div');
+                    content.className = 'card-content';
+                    element.appendChild(content);
+                    content.innerHTML += `<h2 class="card-title"><a href="#${title}">${title}</a></h2>`;
+                    if (currentState.showDetail) {
+                        const html = messages.map(message => message.replace(/^@(.*)/, '<cite>$1</cite>')).join('<br>');
+                        content.innerHTML += `<div class="card-text">${html}</div>`;
+                    }
+                    return element;
+                }
+
+                const waterfall = new Waterfall('waterfall', [], 20);
+
+                function resizeWaterfall() {
+                    if (window.innerWidth >= 1440) {
+                        waterfall.handleResize(4);
+                    } else if (window.innerWidth >= 1024) {
+                        waterfall.handleResize(3);
+                    } else if (window.innerWidth) {
+                        waterfall.handleResize(2);
+                    }
+                }
+
+                window.addEventListener('resize', resizeWaterfall);
+                resizeWaterfall();
+
+                function renderContent() {
+                    waterfall.elements = items.map(item => renderCard(item, currentState.mode === 'message'));
+                    for (let value of params.getAll('mock')) {
+                        let [title, ...messages] = value.split(':');
+                        waterfall.elements.push(renderCard({ title, messages }, true));
+                    }
+                    waterfall.renderColumns();
+                    waterfall.distributeItems();
+                }
+
+                renderContent();
+
+                if (window.location.hash) {
+                    scrollToSection(window.location.hash);
+                }
+
+                window.addEventListener('hashchange', function () {
+                    scrollToSection(window.location.hash);
+                });
+
+                function scrollToSection(hash) {
+                    hash = decodeURIComponent(hash.substring(1));
+                    const element = document.querySelector(`[data-title="${hash}"]`);
+                    if (element) {
+                        element.classList.add('highlight');
+                        setTimeout(() => {
+                            element.classList.remove('highlight');
+                        }, 1500);
+                        element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+
+                window.waterfall = waterfall;
+                window.resizeWaterfall = resizeWaterfall;
+            </script>
             Join us on GitHub: <a
                 href="https://github.com/taichowjinggg/taichowjinggg.github.io">taichowjinggg.github.io</a>
         </footer>
