@@ -29,24 +29,17 @@
         </template>
         <footer>
             <script type="module">
-                window.state = {
-                    showDialog: false,
-                    showDetail: false,
-                    showTitle: true
-                };
-
                 document.getElementById('toggleDisplay').addEventListener('click', () => {
-                    state.showDialog = document.getElementById('toggleDisplay').checked;
-                    renderContent();
+                    document.body.classList.toggle('show-dialog');
+                    waterfall.distributeItems();
                 });
-
                 document.getElementById('toggleTitle').addEventListener('click', () => {
-                    state.showTitle = document.getElementById('toggleTitle').checked;
-                    renderContent();
+                    document.body.classList.toggle('show-title');
+                    waterfall.distributeItems();
                 });
                 document.getElementById('toggleDetail').addEventListener('click', () => {
-                    state.showDetail = document.getElementById('toggleDetail').checked;
-                    renderContent();
+                    document.body.classList.toggle('show-detail');
+                    waterfall.distributeItems();
                 });
 
                 const res = await fetch('./assets/quotations.json');
@@ -58,59 +51,53 @@
                 /** @type {HTMLTemplateElement} */
                 const messageTemplate = document.getElementById('message-template');
 
-                function renderCard({ width, height, title, format = 'png', messages, footer }, showDialog) {
+                function renderCard({ width, height, title, format = 'png', messages, footer }) {
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.dataset.title = title;
 
-                    if (showDialog) {
-                        const container = document.createElement('div');
-                        container.className = 'message-container';
-                        for (let message of messages) {
-                            const clone = messageTemplate.content.cloneNode(true);
-                            if (message.startsWith('@')) {
-                                clone.querySelector('.message-avatar').src = './assets/default-avatar.png';
-                                clone.querySelector('.message-name').innerText = '群友';
-                                message = message.substring(1);
-                            }
-                            clone.querySelector('.message-content').innerHTML = message;
-                            container.appendChild(clone);
+                    const container = document.createElement('div');
+                    container.className = 'card-messages';
+                    for (let message of messages) {
+                        const clone = messageTemplate.content.cloneNode(true);
+                        if (message.startsWith('@')) {
+                            clone.querySelector('.message-avatar').src = './assets/default-avatar.png';
+                            clone.querySelector('.message-name').innerText = '群友';
+                            message = message.substring(1);
                         }
-                        card.appendChild(container);
-                    } else {
-                        const img = document.createElement('img');
-                        img.className = 'card-image';
-                        img.alt = title;
-                        img.src = `./assets/quotations/${title}.${format}`;
-                        img.style.aspectRatio = `${width} / ${height}`;
-                        card.appendChild(img);
+                        clone.querySelector('.message-content').innerHTML = message;
+                        container.appendChild(clone);
                     }
+                    card.appendChild(container);
 
-                    if (!state.showTitle && !state.showDetail) {
-                        return card;
-                    }
+                    const img = document.createElement('img');
+                    img.className = 'card-image';
+                    img.alt = title;
+                    img.src = `./assets/quotations/${title}.${format}`;
+                    img.style.aspectRatio = `${width} / ${height}`;
+                    card.appendChild(img);
 
-                    const content = document.createElement('div');
-                    content.className = 'card-content';
-                    card.appendChild(content);
-
-                    if (state.showTitle) {
-                        content.innerHTML += `<h2 class="card-title"><a href="#${title}">${title}</a></h2>`;
-                    }
-
-                    if (state.showDetail) {
-                        const html = messages.map(message => message.replace(/^@(.*)/, '<cite>$1</cite>')).join('<br>');
-                        content.innerHTML += `<div class="card-text">${html}</div>`;
-                    }
-
+                    messages = messages.map(message => message.replace(/^@(.*)/, '<cite>$1</cite>')).join('<br>');
+                    card.innerHTML += `
+                        <div class="card-content">
+                            <h2 class="card-title"><a href="#${title}">${title}</a></h2>
+                            <div class="card-text">${messages}</div>
+                        </div>
+                    `;
                     if (footer) {
                         card.innerHTML += `<div class="card-footer">${footer}</div>`;
                     }
-
                     return card;
                 }
 
-                const waterfall = new Waterfall('waterfall', [], 20);
+                const waterfall = new Waterfall('waterfall', items.map(item => renderCard(item)), 20);
+
+                for (let value of params.getAll('mock')) {
+                    let [title, ...messages] = value.split(':');
+                    let card = renderCard({ title, messages }, true);
+                    card.classList.add('mock');
+                    waterfall.elements.push(card);
+                }
 
                 function resizeWaterfall() {
                     if (window.innerWidth >= 1440) {
@@ -122,22 +109,6 @@
                     }
                 }
                 window.addEventListener('resize', resizeWaterfall);
-
-                function renderContent() {
-                    // document.getElementById('toggleDisplay').textContent = state.showDialog ? '显示原始截图' : '显示消息窗口';
-                    // document.getElementById('toggleDetail').textContent = state.showDetail ? '隐藏对话内容' : '显示对话内容';
-                    // document.getElementById('toggleTitle').textContent = state.showTitle ? '显示卡片标题' : '隐藏卡片标题';
-
-                    waterfall.elements = items.map(item => renderCard(item, state.showDialog));
-
-                    for (let value of params.getAll('mock')) {
-                        let [title, ...messages] = value.split(':');
-                        waterfall.elements.push(renderCard({ title, messages }, true));
-                    }
-
-                    waterfall.renderColumns();
-                    waterfall.distributeItems();
-                }
 
                 function scrollToHashIfValid() {
                     const hash = decodeURIComponent(window.location.hash.substring(1));
@@ -151,7 +122,6 @@
                 window.addEventListener('hashchange', scrollToHashIfValid);
 
                 resizeWaterfall();
-                renderContent();
                 scrollToHashIfValid();
             </script>
             Join us on GitHub: <a href="https://github.com/taichowjinggg">taichowjinggg</a>

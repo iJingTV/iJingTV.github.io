@@ -111,7 +111,7 @@ h1 {
     transform: scale(1.02);
 }
 
-.message-container {
+.card-messages {
     padding: 8px 16px 18px;
     background-color: #f2f2f2;
 }
@@ -144,4 +144,35 @@ h1 {
 footer {
     text-align: center;
     padding: 20px;
+}
+
+.show-dialog .card-image {
+    display: none;
+}
+
+body:not(.show-dialog) .card-messages {
+    display: none;
+}
+
+.mock {
+    .card-messages {
+
+        display: block !important;
+    }
+
+    .card-image {
+        display: none !important;
+    }
+}
+
+body:not(.show-title) .card-title {
+    display: none;
+}
+
+body:not(.show-detail) .card-text {
+    display: none;
+}
+
+body:not(.show-title):not(.show-detail) .card-content {
+    display: none;
 }
