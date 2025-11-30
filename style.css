@@ -4,7 +4,9 @@
     box-sizing: border-box;
 }
 
-img, h1, h2 {
+img,
+h1,
+h2 {
     -webkit-user-select: none;
     user-select: none;
 }
@@ -54,11 +56,12 @@ h1 {
 .card-image {
     width: 100%;
     height: auto;
+    display: block;
 }
 
 .card-content {
     padding: 15px;
-    padding-top: 8px;
+    padding-top: 10px;
 }
 
 .card-title {
@@ -95,7 +98,8 @@ h1 {
 }
 
 .card-footer {
-    padding: 10px 15px;
+    padding: 15px;
+    padding-top: 10px;
     border-top: 1px solid #eee;
     color: #95a5a6;
     font-size: 0.9em;

@@ -9,6 +9,14 @@
     </head>
     <body>
         <h1>静哥哥圣经</h1>
+        <div class="actions">
+            <input type="checkbox" id="toggleDisplay"></input>
+            <label for="toggleDisplay">显示消息窗口</label>
+            <input type="checkbox" id="toggleTitle"></input>
+            <label for="toggleTitle">显示卡片标题</label>
+            <input type="checkbox" id="toggleDetail"></input>
+            <label for="toggleDetail">显示对话内容</label>
+        </div>
         <div class="waterfall" id="waterfall"></div>
         <template id="message-template">
             <div class="message">
@@ -20,80 +28,25 @@
             </div>
         </template>
         <footer>
-            <div class="actions">
-                <button id="showImage">显示图片</button>
-                <button id="showMessage">显示消息</button>
-                <button id="toggleDetail">显示详细信息</button>
-            </div>
             <script type="module">
-                const currentState = {
-                    mode: 'image',
-                    showDetail: false
+                window.state = {
+                    showDialog: false,
+                    showDetail: false,
+                    showTitle: true
                 };
 
-                function parseUrlParams() {
-                    const urlParams = new URLSearchParams(window.location.search);
-
-                    if (urlParams.has('image')) {
-                        currentState.mode = 'image';
-                    } else if (urlParams.has('message')) {
-                        currentState.mode = 'message';
-                    }
-
-                    if (urlParams.has('detail')) {
-                        currentState.showDetail = true;
-                    }
-                }
-
-                window.addEventListener('popstate', () => {
-                    parseUrlParams();
-                    updateButtonStates();
+                document.getElementById('toggleDisplay').addEventListener('click', () => {
+                    state.showDialog = document.getElementById('toggleDisplay').checked;
                     renderContent();
                 });
 
-                function updateButtonStates() {
-                    document.getElementById('showImage').classList.toggle('active', currentState.mode === 'image');
-                    document.getElementById('showMessage').classList.toggle('active', currentState.mode === 'message');
-                    document.getElementById('toggleDetail').textContent = currentState.showDetail ? '隐藏详细信息' : '显示详细信息';
-                }
-
-                function updateUrl() {
-                    updateButtonStates();
-                    const params = [];
-
-                    if (currentState.mode === 'image') {
-                        params.push('image');
-                    } else {
-                        params.push('message');
-                    }
-
-                    if (currentState.showDetail) {
-                        params.push('detail');
-                    }
-
-                    let newUrl = `${window.location.pathname}?${params.join('&')}`;
-                    window.history.pushState({}, '', newUrl + window.location.hash);
+                document.getElementById('toggleTitle').addEventListener('click', () => {
+                    state.showTitle = document.getElementById('toggleTitle').checked;
                     renderContent();
-                    scrollToSection(window.location.hash);
-                }
-
-
-                parseUrlParams();
-                updateButtonStates();
-
-                document.getElementById('showImage').addEventListener('click', () => {
-                    currentState.mode = 'image';
-                    updateUrl();
                 });
-
-                document.getElementById('showMessage').addEventListener('click', () => {
-                    currentState.mode = 'message';
-                    updateUrl();
-                });
-
                 document.getElementById('toggleDetail').addEventListener('click', () => {
-                    currentState.showDetail = !currentState.showDetail;
-                    updateUrl();
+                    state.showDetail = document.getElementById('toggleDetail').checked;
+                    renderContent();
                 });
 
                 const res = await fetch('./assets/quotations.json');
@@ -105,45 +58,56 @@
                 /** @type {HTMLTemplateElement} */
                 const messageTemplate = document.getElementById('message-template');
 
-                function renderMessages(/** @type {string[]} */ messages) {
-                    const element = document.createElement('div');
-                    element.className = 'message-container';
-                    for (let message of messages) {
-                        const clone = messageTemplate.content.cloneNode(true);
-                        if (message.startsWith('@')) {
-                            clone.querySelector('.message-avatar').src = './assets/default-avatar.png';
-                            clone.querySelector('.message-name').innerText = '群友';
-                            message = message.substring(1);
-                        }
-                        clone.querySelector('.message-content').innerHTML = message;
-                        element.appendChild(clone);
-                    }
-                    return element;
-                }
+                function renderCard({ width, height, title, format = 'png', messages, footer }, showDialog) {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.dataset.title = title;
 
-                function renderCard({ width, height, title, format = 'png', messages }, isMessage) {
-                    const element = document.createElement('div');
-                    element.className = 'card';
-                    element.dataset.title = title;
-                    if (isMessage) {
-                        element.appendChild(renderMessages(messages));
+                    if (showDialog) {
+                        const container = document.createElement('div');
+                        container.className = 'message-container';
+                        for (let message of messages) {
+                            const clone = messageTemplate.content.cloneNode(true);
+                            if (message.startsWith('@')) {
+                                clone.querySelector('.message-avatar').src = './assets/default-avatar.png';
+                                clone.querySelector('.message-name').innerText = '群友';
+                                message = message.substring(1);
+                            }
+                            clone.querySelector('.message-content').innerHTML = message;
+                            container.appendChild(clone);
+                        }
+                        card.appendChild(container);
                     } else {
                         const img = document.createElement('img');
                         img.className = 'card-image';
                         img.alt = title;
                         img.src = `./assets/quotations/${title}.${format}`;
                         img.style.aspectRatio = `${width} / ${height}`;
-                        element.appendChild(img);
+                        card.appendChild(img);
                     }
+
+                    if (!state.showTitle && !state.showDetail) {
+                        return card;
+                    }
+
                     const content = document.createElement('div');
                     content.className = 'card-content';
-                    element.appendChild(content);
-                    content.innerHTML += `<h2 class="card-title"><a href="#${title}">${title}</a></h2>`;
-                    if (currentState.showDetail) {
+                    card.appendChild(content);
+
+                    if (state.showTitle) {
+                        content.innerHTML += `<h2 class="card-title"><a href="#${title}">${title}</a></h2>`;
+                    }
+
+                    if (state.showDetail) {
                         const html = messages.map(message => message.replace(/^@(.*)/, '<cite>$1</cite>')).join('<br>');
                         content.innerHTML += `<div class="card-text">${html}</div>`;
                     }
-                    return element;
+
+                    if (footer) {
+                        card.innerHTML += `<div class="card-footer">${footer}</div>`;
+                    }
+
+                    return card;
                 }
 
                 const waterfall = new Waterfall('waterfall', [], 20);
@@ -157,47 +121,40 @@
                         waterfall.handleResize(2);
                     }
                 }
-
                 window.addEventListener('resize', resizeWaterfall);
-                resizeWaterfall();
 
                 function renderContent() {
-                    waterfall.elements = items.map(item => renderCard(item, currentState.mode === 'message'));
+                    // document.getElementById('toggleDisplay').textContent = state.showDialog ? '显示原始截图' : '显示消息窗口';
+                    // document.getElementById('toggleDetail').textContent = state.showDetail ? '隐藏对话内容' : '显示对话内容';
+                    // document.getElementById('toggleTitle').textContent = state.showTitle ? '显示卡片标题' : '隐藏卡片标题';
+
+                    waterfall.elements = items.map(item => renderCard(item, state.showDialog));
+
                     for (let value of params.getAll('mock')) {
                         let [title, ...messages] = value.split(':');
                         waterfall.elements.push(renderCard({ title, messages }, true));
                     }
+
                     waterfall.renderColumns();
                     waterfall.distributeItems();
                 }
 
-                renderContent();
-
-                if (window.location.hash) {
-                    scrollToSection(window.location.hash);
-                }
-
-                window.addEventListener('hashchange', function () {
-                    scrollToSection(window.location.hash);
-                });
-
-                function scrollToSection(hash) {
-                    hash = decodeURIComponent(hash.substring(1));
+                function scrollToHashIfValid() {
+                    const hash = decodeURIComponent(window.location.hash.substring(1));
                     const element = document.querySelector(`[data-title="${hash}"]`);
                     if (element) {
                         element.classList.add('highlight');
-                        setTimeout(() => {
-                            element.classList.remove('highlight');
-                        }, 1500);
+                        setTimeout(() => element.classList.remove('highlight'), 1500);
                         element.scrollIntoView({ behavior: 'smooth' });
                     }
                 }
+                window.addEventListener('hashchange', scrollToHashIfValid);
 
-                window.waterfall = waterfall;
-                window.resizeWaterfall = resizeWaterfall;
+                resizeWaterfall();
+                renderContent();
+                scrollToHashIfValid();
             </script>
-            Join us on GitHub: <a
-                href="https://github.com/taichowjinggg/taichowjinggg.github.io">taichowjinggg.github.io</a>
+            Join us on GitHub: <a href="https://github.com/taichowjinggg">taichowjinggg</a>
         </footer>
     </body>
 </html>
