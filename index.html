@@ -141,8 +141,13 @@
                 resizeWaterfall();
                 scrollToHashIfValid();
                 document.getElementById('toggleTitle').click();
+
+                if (/Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    waterfall.handleResize(1);
+                }
             </script>
             Join us on GitHub: <a href="https://github.com/iJingTV">iJingTV</a>
+            点击链接加入群聊：<a href="https://qm.qq.com/q/GCuL6vqjiQ">静哥哥粉丝群</a>
         </footer>
     </body>
 </html>
