@@ -259,6 +259,9 @@
                     <div class="info-item">
                         高度: <span id="heightInfo">0</span> px
                     </div>
+                    <div class="info-item">
+                        格式: <span id="formatInfo">PNG</span>
+                    </div>
                 </div>
             </div>
 
@@ -266,19 +269,6 @@
                 <div class="form-group">
                     <label for="title">标题 *</label>
                     <input type="text" id="title" name="title" required placeholder="输入图片标题（将作为文件名）">
-                </div>
-
-                <div class="form-group">
-                    <label for="format">格式</label>
-                    <select id="format" name="format">
-                        <option value="png">PNG</option>
-                        <option value="jpg">JPG</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="footer">底部文字（可选）</label>
-                    <input type="text" id="footer" name="footer" placeholder="输入底部显示的文字">
                 </div>
 
                 <div class="messages-container">
@@ -291,6 +281,11 @@
                     <button type="button" class="btn btn-add" id="addMessage">
                         + 添加消息
                     </button>
+                </div>
+
+                <div class="form-group">
+                    <label for="footer">底部文字（可选）</label>
+                    <input type="text" id="footer" name="footer" placeholder="输入底部显示的文字">
                 </div>
 
                 <div class="loading" id="loading">
@@ -317,6 +312,7 @@
             const imagePreview = document.getElementById('imagePreview');
             const widthInfo = document.getElementById('widthInfo');
             const heightInfo = document.getElementById('heightInfo');
+            const formatInfo = document.getElementById('formatInfo');
             const uploadForm = document.getElementById('uploadForm');
             const messagesList = document.getElementById('messagesList');
             const addMessageBtn = document.getElementById('addMessage');
@@ -328,6 +324,7 @@
             let imageFile = null;
             let imageWidth = 0;
             let imageHeight = 0;
+            let imageFormat = 'PNG';
 
             // 点击上传区域触发文件选择
             uploadArea.addEventListener('click', () => {
@@ -367,6 +364,11 @@
                     return;
                 }
 
+                if (file.type.match('image/jpeg')) {
+                    imageFormat = 'JPG';
+                    formatInfo.textContent = imageFormat;
+                }
+
                 // 验证文件大小（10MB）
                 if (file.size > 10 * 1024 * 1024) {
                     showAlert('图片大小不能超过 10MB', 'error');
@@ -388,11 +390,6 @@
                         previewContainer.style.display = 'block';
                         widthInfo.textContent = imageWidth;
                         heightInfo.textContent = imageHeight;
-
-                        // 根据实际格式设置选择器
-                        const format = file.type.split('/')[1];
-                        if (format === 'jpeg') format = 'jpg';
-                        document.getElementById('format').value = format;
 
                         // 自动生成标题（使用文件名去掉扩展名）
                         const title = file.name.replace(/\.[^/.]+$/, "");
@@ -453,9 +450,9 @@
                 formData.append('width', imageWidth);
                 formData.append('height', imageHeight);
                 formData.append('title', title);
-                formData.append('format', document.getElementById('format').value);
-                formData.append('footer', document.getElementById('footer').value.trim());
+                formData.append('format', imageFormat.toLowerCase());
                 formData.append('messages', JSON.stringify(messages));
+                formData.append('footer', document.getElementById('footer').value.trim());
 
                 // 显示加载状态
                 loading.style.display = 'block';
@@ -467,7 +464,6 @@
                     });
 
                     const result = await response.json();
-
                     if (result.success) {
                         showAlert('上传成功！图片和配置已保存。', 'success');
                         resetForm();

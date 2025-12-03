@@ -90,8 +90,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
         }
 
         // 生成文件名
-        const safeTitle = title.replace(/[^\w\u4e00-\u9fa5-]/g, '_'); // 替换特殊字符
-        const finalFilename = `${safeTitle}.${format || 'png'}`;
+        const finalFilename = `${title}.${format}`;
         const finalPath = path.join(quotationsDir, finalFilename);
 
         // 重命名文件
@@ -102,17 +101,17 @@ app.post('/upload', upload.single('image'), async (req, res) => {
             width: parseInt(width),
             height: parseInt(height),
             title: title,
-            messages: messagesArray
         };
+        if (format && format.trim() === 'jpg') {
+            newEntry.format = 'jpg';
+        }
+        newEntry.messages = messagesArray;
 
         // 添加可选的footer
         if (footer && footer.trim()) {
             newEntry.footer = footer.trim();
         }
 
-        if (format && format.trim() === 'jpg') {
-            newEntry.format = format.trim();
-        }
 
         // 读取现有的quotations.json
         const jsonData = await fs.readFile(jsonFilePath, 'utf8');
