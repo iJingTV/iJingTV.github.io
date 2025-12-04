@@ -140,7 +140,7 @@ h1 {
     user-select: none;
 }
 
-.message-content {
+.message-bubble {
     margin-top: 4px;
     background-color: white;
     padding: 10px 15px;
@@ -236,5 +236,42 @@ input.switch[type="checkbox"]:checked::before {
 
     input.switch {
         font-size: 1.2em;
+    }
+}
+
+body:not(.show-dialog) label:has(#toggleBubble) {
+    display: none;
+}
+
+.wechat-bubble {
+    .message-body {
+        position: relative;
+    }
+
+    .message-bubble {
+        padding: 8px 12px;
+        border-radius: 4px;
+    }
+
+    .message-bubble::after {
+        position: absolute;
+        content: '\25c0';
+        color: white;
+        left: -8px;
+        top: 26px;
+    }
+}
+
+.message-continue {
+    margin-top: 0;
+
+    .message-name {
+        display: none;
+    }
+    .message-avatar {
+        opacity: 0;
+    }
+    .message-bubble::after {
+        display: none;
     }
 }

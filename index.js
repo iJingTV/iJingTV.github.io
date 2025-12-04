@@ -2,6 +2,10 @@ document.getElementById('toggleDisplay').addEventListener('click', () => {
   document.body.classList.toggle('show-dialog');
   waterfall.distributeItems();
 });
+document.getElementById('toggleBubble').addEventListener('click', () => {
+  document.body.classList.toggle('wechat-bubble');
+  waterfall.distributeItems();
+});
 document.getElementById('toggleTitle').addEventListener('click', () => {
   document.body.classList.toggle('show-title');
   waterfall.distributeItems();
@@ -27,15 +31,29 @@ function renderCard({ width, height, title, format = 'png', messages, footer }) 
 
   const container = document.createElement('div');
   container.className = 'card-messages';
+  let currentSender, lastSender;
   for (let message of messages) {
     const clone = messageTemplate.content.cloneNode(true);
     if (message.startsWith('@')) {
       clone.querySelector('.message-avatar').src = './assets/default-avatar.png';
       clone.querySelector('.message-name').innerText = '群友';
       message = message.substring(1);
+      currentSender = "群友";
+    } else if (message.startsWith('#')) {
+      clone.querySelector('.message-avatar').src = './assets/default-avatar.png';
+      clone.querySelector('.message-avatar').style.filter = 'invert(1)';
+      clone.querySelector('.message-name').innerText = '另一位群友';
+      message = message.substring(1);
+      currentSender = "另一位群友";
+    } else {
+      currentSender = "静哥哥"
     }
-    clone.querySelector('.message-content').innerHTML = message;
+    if (currentSender === lastSender) {
+      clone.querySelector('.message').classList.add('message-continue');
+    }
+    clone.querySelector('.message-bubble').innerHTML = message;
     container.appendChild(clone);
+    lastSender = currentSender;
   }
   card.appendChild(container);
 
@@ -46,7 +64,7 @@ function renderCard({ width, height, title, format = 'png', messages, footer }) 
   img.style.aspectRatio = `${width} / ${height}`;
   card.appendChild(img);
 
-  messages = messages.map(message => message.replace(/^@(.*)/, '<cite>$1</cite>')).join('<br>');
+  messages = messages.map(message => message.replace(/^[@#](.*)/, '<cite>$1</cite>')).join('<br>');
   card.innerHTML += `\
     <div class="card-content">
       <h2 class="card-title"><a href="#${title}">${title}</a></h2>
@@ -93,6 +111,7 @@ window.addEventListener('hashchange', scrollToHashIfValid);
 
 resizeWaterfall();
 scrollToHashIfValid();
+document.getElementById('toggleDisplay').click();
 document.getElementById('toggleTitle').click();
 
 if (/Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
