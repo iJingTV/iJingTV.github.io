@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Let's Go Panicked!</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap">
+        <link rel="stylesheet" href="panicked.css">
+    </head>
+    <body>
+        <!-- 粒子背景容器 -->
+        <div class="particles-container" id="particles-js"></div>
+
+        <div class="container">
+            <!-- 头部导航 -->
+            <header>
+                <div class="logo">
+                    <div class="logo-icon"><i class="fas fa-robot"></i></div>
+                    <div class="logo-text">Let's Go Panicked!</div>
+                </div>
+                <!-- <nav class="nav-menu">
+                <a href="#" class="active">首页</a>
+                <a href="#">大赛介绍</a>
+                <a href="#">赛程安排</a>
+                <a href="#">评审标准</a>
+                <a href="#">往届作品</a>
+                <a href="#">联系我们</a>
+            </nav> -->
+            </header>
+
+            <!-- 主标题区域 -->
+            <section class="hero">
+                <h1>惊慌失措 RIIR 大赛</h1>
+                <p class="hero-subtitle">
+                    汇聚全球AI英才，探索前沿技术，解决真实世界挑战。
+                    <!-- <br>
+                    本届大赛主题：<span class="highlight">"AI赋能可持续发展"</span> -->
+                </p>
+
+                <!-- 倒计时 -->
+                <div class="countdown">
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="days">00</div>
+                        <div class="countdown-label">天</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="hours">00</div>
+                        <div class="countdown-label">小时</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="minutes">00</div>
+                        <div class="countdown-label">分钟</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="seconds">00</div>
+                        <div class="countdown-label">秒</div>
+                    </div>
+                </div>
+
+                <!-- <a href="#download" class="download-btn" style="font-size: 1.2rem; padding: 15px 40px;">
+                    <i class="fas fa-download"></i> 立即下载题目文件
+                </a> -->
+            </section>
+
+            <!-- 下载区域 -->
+            <section class="download-section" id="download">
+                <h2 class="section-title">赛事内容</h2>
+                <p class="section-subtitle">下载 MLTrie.py，在一周时间内使用 Rust 语言重写它。你可以使用诸如pyo3等工具来实现Python和Rust之间的交互。当然也可以直接使用命令行通信来实现。评比时会综合考虑代码质量、时空复杂度等多方面因素。</p>
+
+
+                <div class="download-cards">
+                    <div class="download-card">
+                        <h3><i class="fas fa-trophy"></i> 奖项设置</h3>
+                        undefined
+                        <br>
+                        <br>
+                        <p>是的没错，没有奖项，纯娱乐。</p>
+                        <p>或者你想的话我也可以在 iJingTV 上放几个你的广告之类的……</p>
+                        <p>总之快来参赛吧！</p>
+                    </div>
+
+                    <div class="download-card">
+                        <div class="download-icon">
+                            <i class="fas fa-file-code"></i>
+                        </div>
+                        <h3>MLTrie.py</h3>
+                        <p>包含MLTrie类的Python代码文件，用于实现多语言字典树。</p>
+                        <a href="./MLTrie.py" class="download-btn" id="download-pdf">
+                            <i class="fas fa-download"></i> 下载MLTrie.py
+                        </a>
+                        <div class="file-info">
+                            <span><i class="fas fa-file"></i> 大小: 33 KB</span>
+                        </div>
+                    </div>
+
+                    <div class="download-card">
+                        <h3><i class="fas fa-users"></i> 参赛要求</h3>
+                        <br>
+                        <!-- <p>• 团队参赛 (1-4人)</p> -->
+                        <p>• 年龄不限，专业不限</p>
+                        <p>• 可使用任何AI框架和工具</p>
+                        <p>• 提交完整代码和报告</p>
+                        <p>• 代码必须在规定时间内提交</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 大赛信息 -->
+            <!-- <section class="info-section">
+                <h2 class="section-title">大赛重要信息</h2>
+
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3><i class="far fa-calendar-alt"></i> 关键日期</h3>
+                        <p>• 报名截止: 2023年10月15日</p>
+                        <p>• 初赛提交: 2023年11月20日</p>
+                        <p>• 决赛名单公布: 2023年12月5日</p>
+                        <p>• 总决赛: 2023年12月20日</p>
+                    </div>
+
+                </div>
+            </section> -->
+        </div>
+
+        <!-- 页脚 -->
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-column">
+                        <h4>惊慌失措 RIIR 大赛</h4>
+                        <p>汇聚全球AI英才，推动人工智能技术发展与创新应用，解决真实世界挑战。</p>
+                        <p>© 2025 Let's Go Panicked Committee. All rights reserved.</p>
+                    </div>
+
+                    <!-- <div class="footer-column">
+                        <h4>快速链接</h4>
+                        <a href="#">大赛介绍</a>
+                        <a href="#download">题目下载</a>
+                        <a href="#">提交作品</a>
+                        <a href="#">评审标准</a>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>联系我们</h4>
+                        <p><i class="fas fa-envelope"></i> contact@aichallenge.org</p>
+                        <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+                        <p><i class="fas fa-map-marker-alt"></i> 硅谷创新中心, 加州, 美国</p>
+                    </div> -->
+                </div>
+
+                <!-- <div class="copyright">
+                    <p>这里似乎应该写点什么字的，不然是不是有点太空了</p>
+                </div> -->
+            </div>
+        </footer>
+
+        <!-- 粒子背景库 -->
+        <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+        <script>
+            // 初始化粒子背景
+            document.addEventListener('DOMContentLoaded', function () {
+                particlesJS('particles-js', {
+                    particles: {
+                        number: { value: 80, density: { enable: true, value_area: 800 } },
+                        color: { value: "#00d4ff" },
+                        shape: { type: "circle" },
+                        opacity: { value: 0.5, random: true },
+                        size: { value: 3, random: true },
+                        line_linked: {
+                            enable: true,
+                            distance: 150,
+                            color: "#0077ff",
+                            opacity: 0.2,
+                            width: 1
+                        },
+                        move: {
+                            enable: true,
+                            speed: 2,
+                            direction: "none",
+                            random: true,
+                            straight: false,
+                            out_mode: "out",
+                            bounce: false
+                        }
+                    },
+                    interactivity: {
+                        detect_on: "canvas",
+                        events: {
+                            onhover: { enable: true, mode: "repulse" },
+                            onclick: { enable: true, mode: "push" }
+                        }
+                    },
+                    retina_detect: true
+                });
+
+                const countdownDate = new Date("2025 12 14 12:00:00").getTime();
+
+                function updateCountdown() {
+                    const now = new Date().getTime();
+                    const distance = countdownDate - now;
+
+                    if (distance < 0) {
+                        console.log("Countdown expired!");
+                        clearInterval(countdownInterval);
+                        document.getElementById("days").innerHTML = "00";
+                        document.getElementById("hours").innerHTML = "00";
+                        document.getElementById("minutes").innerHTML = "00";
+                        document.getElementById("seconds").innerHTML = "00";
+                        return;
+                    }
+
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
+                    document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
+                    document.getElementById("minutes").innerHTML = minutes.toString().padStart(2, '0');
+                    document.getElementById("seconds").innerHTML = seconds.toString().padStart(2, '0');
+                }
+
+                // 立即更新一次，然后每秒钟更新
+                updateCountdown();
+                const countdownInterval = setInterval(updateCountdown, 1000);
+            });
+        </script>
+    </body>
+</html>
