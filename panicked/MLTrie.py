@@ -16,17 +16,6 @@ import numpy as np
 import tqdm
 from numpy.typing import NDArray
 
-try:
-    from numba import jit  # type: ignore
-except ImportError:  # numba尚未支持python3.14。支持后应去掉此t/e
-
-    def jit(*_, **_____):
-        def _in(func):
-            return func
-
-        return _in
-
-
 bit = uint7 = uint8 = uint24 = uint32 = int
 byte3 = byte4 = bytes
 
@@ -90,7 +79,11 @@ def headfindHOE(arr: bytearray | memoryview, target: bytes | bytearray):
     return -1
 
 
-class SourceDrainedError(StopIteration):
+class SourceDrainedError(OverflowError):
+    pass
+
+
+class SourceEmptyError(OverflowError):
     pass
 
 
@@ -136,7 +129,7 @@ class MLTrie:
         main_progress.update(1)
         main_progress.set_description("写MARISA中…… (3/6)")
 
-        self.lval = {
+        self.lval: dict[int, marisa_trie.Trie] = {
             k: marisa_trie.Trie(v)
             for k, v in tqdm.tqdm(
                 lengths.items(),
@@ -334,6 +327,8 @@ class MLTrie:
     @staticmethod
     def seg_merge(segs: Iterable[Tnode | Tnodes]) -> list[Tnodes]:
         src: list[Tnodes] = [nodes if len(nodes) == 3 else (*nodes, 1) for nodes in segs]
+        if not src:
+            return []
         src.sort()  # sort默认是把元组按照首位优先排序
         ret: list[Tnodes] = [src.pop(0)]
         for nodes in src:
@@ -445,6 +440,8 @@ class MLTrie:
 
     def extract_batch(self, segs: Iterable[Tnode | Tnodes], num: int, exact: bool = False) -> list[str]:
         src = self.seg_merge(segs)
+        if not src:
+            raise SourceEmptyError
         weights = [nodes[2] for nodes in src]
         selected = random.choices(src, weights, k=num)
         count = Counter(selected)
@@ -587,7 +584,7 @@ class MLTrie:
             return list(np.random.choice(unique, num, p=weights, replace=False))
 
     def navigate(self, key: bytes) -> Tnode:  # 返回的是(层数, 索引)二元组。索引为编号索引nidx不是内存索引nmidx。
-        if not (0 < len(key) <= len(self.layers)):
+        if not 0 < len(key) <= len(self.layers):
             raise ValueError
         parent = PDFT
         for i, char in enumerate(key):
@@ -599,12 +596,22 @@ class MLTrie:
             parent = pos
         return len(key) - 1, parent
 
-    def bfs_search(
+    def search(
         self, key: Sequence[bytes | list[tuple[uint8, uint8]] | None], leaf_only: bool = False, src: list[Tnode] | None = None
     ) -> Generator[Tnode, None, None]:
-        if not (0 < len(key) <= len(self.layers)):
+        if not 0 < len(key) <= len(self.layers):
             return
         queue: deque[tuple[int, uint24, int]] = deque()  # lidx, nidx, kidx
+
+        if not src:
+            try:
+                prefix_byte = next(i for i in range(len(key)) if not (isinstance(key[i], bytes) and len(cast(bytes, key[i])) == 1))
+                if prefix_byte:
+                    src = [self.navigate(b"".join(cast(list[bytes], key[:prefix_byte])))]
+                    key = key[prefix_byte:]
+            except StopIteration:
+                yield self.navigate(b"".join(cast(list[bytes], key)))
+                return
 
         try:
             prefix_nones = next(i for i in range(len(key)) if key[i] is not None)
@@ -617,9 +624,11 @@ class MLTrie:
             return
 
         if src:
-            queue.extend((lidx, nidx, 0) for lidx, nidx in src)
+            queue.extend(
+                (*succ, prefix_nones) for src_node in src for succ in self.expand(self.get_successor(src_node, src_node[0] + prefix_nones + 1))
+            )
         elif self.layers:
-            queue.extend((prefix_nones, i, 0) for i in range(len(self.layers[prefix_nones]) // NS))
+            queue.extend((prefix_nones, i, prefix_nones) for i in range(len(self.layers[prefix_nones]) // NS))
 
         lkm1 = len(key) - 1  # Len Key Minus 1
 
@@ -643,37 +652,6 @@ class MLTrie:
                         yield (lidx, nidx)
                 elif clen and (mdpt >= min(MDPTH, lkm1 - kidx)):
                     queue.extend((lidx + 1, cidx + i, kidx + 1) for i in range(clen))
-
-    def dfs_search(
-        self, key: Sequence[bytes | list[tuple[uint8, uint8]] | None], leaf_only: bool = False, src: list[Tnode] | None = None
-    ) -> Generator[Tnode, None, None]:
-        # 笑点解析: 其实完全就是bfs的换皮版本
-        # 好吧现在不是了
-        if not (0 < len(key) <= len(self.layers)):
-            return
-        stack: list[tuple[int, uint24, int]] = []
-        if src:
-            stack.extend((lidx, nidx, 0) for lidx, nidx in reversed(src))
-        elif self.layers:
-            stack.extend((0, i, 0) for i in range((len(self.layers[0]) // NS) - 1, -1, -1))
-
-        while stack:
-            lidx, nidx, kidx = stack.pop()
-            char, cidx_clen, val_jmp_mdpt = struct.unpack_from(">BII", self.layers[lidx], nidx * NS + POE)
-            char: uint8
-            cidx_clen: uint32
-            val_jmp_mdpt: uint32
-            cidx, clen, jump, mdpt = cidx_clen >> CSO, cidx_clen & LMS, val_jmp_mdpt >> JSO & JMS, val_jmp_mdpt & MMS
-
-            pattern: bytes | list[tuple[uint8, uint8]] | None = key[kidx]
-            if (pattern is None) or (
-                (char in pattern) if isinstance(pattern, bytes) else any(lower <= char <= upper for lower, upper in pattern)
-            ):
-                if kidx == len(key) - 1:
-                    if not leaf_only or not jump:
-                        yield (lidx, nidx)
-                elif clen and (mdpt >= min(MDPTH, len(key) - kidx - 1)):
-                    stack.extend((lidx + 1, cidx + i, kidx + 1) for i in range(clen - 1, -1, -1))
 
     def rebuild_path(self, node: Tnode, min_lidx: int = 0) -> Iterator[Tnode]:
         path = [node]
@@ -718,8 +696,37 @@ class MLTrie:
 
         return (lidx, lo_l, lo - lo_l + 1)
 
+    def get_successor_tnodes(self, node: Tnodes, lidx: int, default: Any = None) -> Tnodes:
+        mlen = struct.unpack_from(">B", self.layers[node[0]], node[1] * NS + MOF)[0]
+        if (mlen & MMS) < min(MDPTH, lidx - node[0]):
+            if default is not None:
+                return default
+            raise IndexError
+        lo, hi = 0, len(self.layers[lidx]) // NS
+        plidx, pnidxl, pnidxs = node
+        pnidxr = pnidxl + pnidxs - 1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if self.get_ancestor((lidx, mid), plidx)[1] < pnidxl:
+                lo = mid + 1
+            else:
+                hi = mid
+        lo_l = lo
+        hi = len(self.layers[lidx]) // NS
+        while lo < hi:
+            mid = (lo + hi + 1) // 2
+            if self.get_ancestor((lidx, mid), plidx)[1] <= pnidxr:
+                lo = mid
+            else:
+                hi = mid - 1
+
+        return (lidx, lo_l, lo - lo_l + 1)
+
     def get_successor_batch(self, segs: Iterable[Tnode], lidx: int) -> list[Tnodes]:
         return self.seg_merge(result for node in segs if (result := self.get_successor(node, lidx, default=0)))
+
+    def get_successor_batch_tnodes(self, segs: Iterable[Tnodes], lidx: int) -> list[Tnodes]:
+        return self.seg_merge(result for node in segs if (result := self.get_successor_tnodes(node, lidx, default=0)))
 
     def get_successor_from(self, node: Tnode, lidx: int, leaf_only: bool = False) -> Generator[Tnodes, None, None]:
         for lvl_idx in range(lidx, len(self.layers)):
@@ -729,11 +736,14 @@ class MLTrie:
                 yield self.get_successor(node, lvl_idx)
 
     def get_successor_from_batch(self, segs: Iterable[Tnode], lidx: int, leaf_only: bool = False) -> Generator[Tnodes, None, None]:
+        src = self.seg_merge(segs)
         for lvl_idx in range(lidx, len(self.layers)):
             if leaf_only and lvl_idx not in self.lval:
                 continue
-            with suppress(IndexError):
-                yield from self.get_successor_batch(segs, lvl_idx)
+            # with suppress(IndexError):
+            dbg = self.get_successor_batch_tnodes(src, lvl_idx)
+            print(f"DEBUG: {dbg=} {lvl_idx=}")
+            yield from dbg
 
     def node_data(self, node: tuple[int, uint24]) -> TnodeData:
         lidx, nidx = node
