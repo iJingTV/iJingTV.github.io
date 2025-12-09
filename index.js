@@ -24,6 +24,12 @@ const params = new URLSearchParams(window.location.search);
 /** @type {HTMLTemplateElement} */
 const messageTemplate = document.getElementById('message-template');
 
+const userNameMap = {
+  '@': ['群友', ''],
+  '#': ['另一位群友', 'invert(1)'],
+  '$': ['第三位群友', 'contrast(0.5)'],
+};
+
 function renderCard({ width, height, title, format = 'png', messages, footer }) {
   const card = document.createElement('div');
   card.className = 'card';
@@ -34,19 +40,22 @@ function renderCard({ width, height, title, format = 'png', messages, footer }) 
   let currentSender, lastSender;
   for (let message of messages) {
     const clone = messageTemplate.content.cloneNode(true);
+    currentSender = "静哥哥"
+    for (let [prefix, [userName, filter]] of Object.entries(userNameMap)) {
+      if (message.startsWith(prefix)) {
+        clone.querySelector('.message-avatar').src = './assets/default-avatar.png';
+        clone.querySelector('.message-avatar').style.filter = filter;
+        clone.querySelector('.message-name').innerText = userName;
+        message = message.substring(1);
+        currentSender = userName;
+        break;
+      }
+    }
     if (message.startsWith('@')) {
       clone.querySelector('.message-avatar').src = './assets/default-avatar.png';
       clone.querySelector('.message-name').innerText = '群友';
       message = message.substring(1);
       currentSender = "群友";
-    } else if (message.startsWith('#')) {
-      clone.querySelector('.message-avatar').src = './assets/default-avatar.png';
-      clone.querySelector('.message-avatar').style.filter = 'invert(1)';
-      clone.querySelector('.message-name').innerText = '另一位群友';
-      message = message.substring(1);
-      currentSender = "另一位群友";
-    } else {
-      currentSender = "静哥哥"
     }
     if (currentSender === lastSender) {
       clone.querySelector('.message').classList.add('message-continue');
@@ -64,7 +73,7 @@ function renderCard({ width, height, title, format = 'png', messages, footer }) 
   img.style.aspectRatio = `${width} / ${height}`;
   card.appendChild(img);
 
-  messages = messages.map(message => message.replace(/^[@#](.*)/, '<cite>$1</cite>')).join('<br>');
+  messages = messages.map(message => message.replace(/^[@#$](.*)/, '<cite>$1</cite>')).join('<br>');
   card.innerHTML += `\
     <div class="card-content">
       <h2 class="card-title"><a href="#${title}">${title}</a></h2>

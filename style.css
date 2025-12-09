@@ -145,6 +145,7 @@ h1 {
     background-color: white;
     padding: 10px 15px;
     border-radius: 10px;
+    width: fit-content;
 }
 
 footer {
