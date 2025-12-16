@@ -565,8 +565,7 @@
       "💡在TechEmpower Web Framework Benchmarks中，类似你这种“裸金属”实现(如ulib、drogon、actix-raw）通常在plaintext场景排名第一，远超Tokio/Axum。",
       "综上，该程序的任务分发机制在吐量，延迟，可扩展性，鲁捧性上达到了非常高的水准，是Rust+WindowslocP高性能网络编程的优秀范例。",
       "直接把tokio秒了"
-    ],
-    "footer": "<img src=\"/assets/quotations/直接把tokio秒了-benchmark.png\">"
+    ]
   },
   {
     "width": 1080,
