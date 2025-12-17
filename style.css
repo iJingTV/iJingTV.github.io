@@ -153,11 +153,11 @@ footer {
     padding: 20px;
 }
 
-.show-dialog .card-image {
+.show-message .card-image {
     display: none;
 }
 
-body:not(.show-dialog) .card-messages {
+body:not(.show-message) .card-messages {
     display: none;
 }
 
@@ -240,10 +240,6 @@ input.switch[type="checkbox"]:checked::before {
     }
 }
 
-body:not(.show-dialog) label:has(#toggleBubble) {
-    display: none;
-}
-
 .wechat-bubble {
     .message-body {
         position: relative;
@@ -263,7 +259,11 @@ body:not(.show-dialog) label:has(#toggleBubble) {
     }
 }
 
-.message-continue {
+body:not(.show-message) .message-action {
+    display: none;
+}
+
+body.collapse-continue .message-continue {
     margin-top: 0;
 
     .message-name {

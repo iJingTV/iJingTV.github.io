@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>静哥哥圣经</title>
         <script src="./waterfall.js"></script>
-        <script src="./index.js" defer type="module"></script> 
+        <script src="./index.js" defer type="module"></script>
         <link rel="stylesheet" href="./style.css">
     </head>
     <body>
@@ -13,21 +13,25 @@
         <div class="actions">
             <label>
                 原始截图
-                <input class="switch" type="checkbox" id="toggleDisplay">
+                <input class="switch" type="checkbox" id="toggleDisplay" data-class="show-message"></input>
                 消息窗口
             </label>
-            <label>
+            <label class="message-action">
                 QQ气泡
-                <input class="switch" type="checkbox" id="toggleBubble"></input>
+                <input class="switch" type="checkbox" id="toggleBubble" data-class="wechat-bubble"></input>
                 微信气泡
+            </label>
+            <label class="message-action">
+                折叠连续消息
+                <input class="switch" type="checkbox" id="toggleContinue" data-class="collapse-continue"></input>
             </label>
             <label>
                 显示卡片标题
-                <input class="switch" type="checkbox" id="toggleTitle"></input>
+                <input class="switch" type="checkbox" id="toggleTitle" data-class="show-title"></input>
             </label>
             <label>
                 显示对话内容
-                <input class="switch" type="checkbox" id="toggleDetail"></input>
+                <input class="switch" type="checkbox" id="toggleDetail" data-class="show-detail"></input>
             </label>
         </div>
         <div class="waterfall" id="waterfall"></div>

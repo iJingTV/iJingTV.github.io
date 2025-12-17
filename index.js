@@ -1,19 +1,9 @@
-document.getElementById('toggleDisplay').addEventListener('click', () => {
-  document.body.classList.toggle('show-dialog');
-  waterfall.distributeItems();
-});
-document.getElementById('toggleBubble').addEventListener('click', () => {
-  document.body.classList.toggle('wechat-bubble');
-  waterfall.distributeItems();
-});
-document.getElementById('toggleTitle').addEventListener('click', () => {
-  document.body.classList.toggle('show-title');
-  waterfall.distributeItems();
-});
-document.getElementById('toggleDetail').addEventListener('click', () => {
-  document.body.classList.toggle('show-detail');
-  waterfall.distributeItems();
-});
+for (const input of document.querySelectorAll('.actions input.switch')) {
+  input.addEventListener('click', () => {
+    document.body.classList.toggle(input.dataset.class);
+    waterfall.distributeItems();
+  });
+}
 
 const res = await fetch('./assets/quotations.json');
 /** @type {{ width: number, height: number, title: string, format: string, messages: string[] }[]} */
